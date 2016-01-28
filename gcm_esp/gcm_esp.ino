@@ -66,9 +66,9 @@ WiFiServer server(80);
 /** Reason of failure of received command */
 String failReason = "unknown";
 /** Definition of message IDs */
-String messageIDs[2] = {"message","timestamp"};
+String messageIDs[10] = {"message","timestamp","","","","","","","",""};
 /** Message texts for the GCM push */
-String messageTxts[2] = {"",""};
+String messageTxts[10] = {"","","","","","","","","",""};
 /** Just for testing, counter to be send as message */
 int msgCnt = 0;
 
