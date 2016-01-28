@@ -4,7 +4,7 @@
 Send notifications to Android devices with Google Cloud Messaging without additional web server<br />
 
 ## Why
-Most tutorials found on the web use a external webserver, PHP scripts and MySQL databases as an interface to send notifications via the Google Cloud Messaging (GCM) service. As the ESP8266 has a webserver capability, but no PHP or MySQL support I wrote this code to replace the external webserver, PHP scripts and MySQL database.<br />
+I wanted to use Google Cloud Messaging on my ESP8266 to push notifications to Android devices. Most tutorials found on the web use a external webserver, PHP scripts and MySQL databases as an interface to send notifications via the Google Cloud Messaging (GCM) service. As the ESP8266 has a webserver capability, but no PHP or MySQL support I wrote this code to replace the external webserver, PHP scripts and MySQL database.<br />
 
 ## How
 Instead of PHP scripts and a MySQL database I use below explained functions and SPIFFS filesystem for the GCM connection functions and saving the Android registration ids.<br />
