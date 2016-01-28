@@ -1,0 +1,136 @@
+# GCM-ESP8266
+
+## What does it do
+Send notifications to Android devices with Google Cloud Messaging without additional web server<br />
+
+## Why
+Most tutorials found on the web use a external webserver, PHP scripts and MySQL databases as an interface to send notifications via the Google Cloud Messaging (GCM) service. As the ESP8266 has a webserver capability, but no PHP or MySQL support I wrote this code to replace the external webserver, PHP scripts and MySQL database.<br />
+
+## How
+Instead of PHP scripts and a MySQL database I use below explained functions and SPIFFS filesystem for the GCM connection functions and saving the Android registration ids.<br />
+
+## Required libraries
+To send requests to the GCM servers JSON objects are used. The easiest way to implement JSON decoding and encoding is with the ArduinoJson library written by Benoit Blanchon.<br />
+All credits for the ArduinoJson library go to Benoit Blanchon. You can get it from:<br />
+http://blog.benoitblanchon.fr/arduino-json-v5-0/<br />
+https://github.com/bblanchon/ArduinoJson<br />
+Install the library as explained in the ArduinoJson Wiki: https://github.com/bblanchon/ArduinoJson/wiki/Using%20the%20library%20with%20Arduino<br />
+
+## Detailed description
+**TODO** Add valid link<br />
+http://desire.giesecke.tk/esp8266-using-gcm-without-external-server/<br />
+
+## Function references
+###boolean writeRegIds()
+#####Description
+reads Android registration ids from the array regAndroidIds[] and saves them to the file gcm.txt as JSON object
+#####Arguments
+none
+#####Used global variables
+Global string array *regAndroidIds[]* contains the ids<br />
+Global int *regDevNum* contains number of devices
+#####Return value
+_true_ if the registration ids were successfully saved<br />
+_false_ if a file error occured
+
+###boolean getRegisteredDevices()
+#####Description
+reads Android registration ids from the file gcm.txt and stores them in the array regAndroidIds[]
+#####Arguments
+none
+#####Used global variables
+Global string array *regAndroidIds[]* contains the ids<br />
+Global int *regDevNum* contains number of devices
+#####Return value
+_true_ if the registration ids were successfully read<br />
+_false_ if a file error occured or if the content of the file was corrupted
+#####Example
+    if (!getRegisteredDevice()) {
+        Serial.println("Failed to read IDs");
+    } else {
+        if (regDevNum != 0) { // Any devices already registered?
+            for (int i=0; i<regDevNum; i++) {
+                Serial.println("Device #"+String(i)":");
+                Serial.println(regAndroidIds[i]);
+            }
+        }
+    }
+
+###boolean addRegisteredDevice()
+#####Description
+adds a new Android registration id to the file gcm.txt
+#####Arguments
+_newDeviceID_ String containing the registration id
+#####Used global variables
+Global string array *regAndroidIds[]* contains the ids<br />
+Global int *regDevNum* contains number of devices
+#####Return value
+_true_ if the registration id was successfully added<br />
+_false_ if the registration id was invalid, if the max number of ids was reached or if a file error occured
+#####Example
+    String newID = "XXX91bFZIZMVJPeWjfEfaqMOWctyfAOifSl6Tz52BpCVHIsGmJnq7dr8XIAueSV2SsjkTTW_vlhDGOS8t-uuITk3jAe-d8NnYuuzhGdS3jGiXpgJYFAfz1gqndx_yz0zo3cWcLsJ0Usx";
+    if (!addRegisteredDevice(newID)) {
+        Serial.println("Failed to save ID");
+    } else {
+        Serial.println("Successful saved ID");
+    }
+
+###boolean delRegisteredDevice()
+#####Description
+deletes one or all Android registration id(s) from the file gcm.txt
+#####Arguments
+_delAll_ boolean flag for deleting all registration ids
+_delRegId_ String with the registration id to be deleted
+_delRegIndex_ Index of the registration id to be deleted
+#####Used global variables
+Global string array *regAndroidIds[]* contains the ids<br />
+Global int *regDevNum* contains number of devices
+#####Return value
+_true_ if the registration id(s) was/were successfully deleted<br />
+_false_ if the registration id was not found, if the indwx was invalid or if a file error occured
+#####Example
+    // Delete registration id by the id itself
+    String delID = "XXX91bFZIZMVJPeWjfEfaqMOWctyfAOifSl6Tz52BpCVHIsGmJnq7dr8XIAueSV2SsjkTTW_vlhDGOS8t-uuITk3jAe-d8NnYuuzhGdS3jGiXpgJYFAfz1gqndx_yz0zo3cWcLsJ0Usx";
+    if (!delRegisteredDevice(false, delID, 9999)) {
+        Serial.println("Failed to delete ID");
+    } else {
+        Serial.println("Successful deleted ID");
+    }
+
+    // Delete registration id at index
+    int delIndex = 1;
+    if (!delRegisteredDevice(false, "", delIndex)) {
+        Serial.println("Failed to delete ID");
+    } else {
+        Serial.println("Successful deleted ID");
+    }
+
+    // Delete all saved registration ids
+    int delIndex = 1;
+    if (!delRegisteredDevice(true, "", 9999)) {
+        Serial.println("Failed to delete IDs");
+    } else {
+        Serial.println("Successful deleted all IDs");
+    }
+
+###boolean gcmSendMsg()
+#####Description
+sends message to https://android.googleapis.com/gcm/send to	request a push notification to all registered Android devices
+#####Arguments
+_numData_ int number of keys and messages to be added to the push notification
+_pushMessageIds[]_ String array with the key(s) for the message(s)
+_pushMessages[]_ String array with the message(s)
+#####Used global variables
+Global string array *regAndroidIds[]* contains the ids<br />
+Global int *regDevNum* contains number of devices
+#####Return value
+_true_ if the request was successful send to the GCM server<br />
+_false_ if sending the request to the GCM server failed
+#####Example
+    String messageIDs[2] = {"sensor","value"};
+    String messageTxts[2] = ("humidity","95%"};
+    if (!gcmSendMsg(2, messageIDs, messageTxts)) {
+        Serial.println("Failed to request push notification");
+    } else {
+        Serial.println("Successful requested push notification");
+    }
