@@ -14,14 +14,13 @@ Instead of PHP scripts and a MySQL database I use below explained functions and 
 ## Required libraries
 To send requests to the GCM servers JSON objects are used. The easiest way to implement JSON decoding and encoding is with the ArduinoJson library written by Benoit Blanchon.<br />
 All credits for the ArduinoJson library go to Benoit Blanchon. You can get it from:<br />
-http://blog.benoitblanchon.fr/arduino-json-v5-0/<br />
-https://github.com/bblanchon/ArduinoJson<br />
+[Blog on Good Code Smell](http://blog.benoitblanchon.fr/arduino-json-v5-0/)<br />
+[Github sources](https://github.com/bblanchon/ArduinoJson)<br />
 Install the library as explained in the ArduinoJson Wiki: https://github.com/bblanchon/ArduinoJson/wiki/Using%20the%20library%20with%20Arduino<br />
 
 ## Detailed description
-**TODO** Add valid link<br />
-http://desire.giesecke.tk/esp8266-google-cloud-messaging-without-external-server/<br />
-https://github.com/beegee-tokyo/GCM-ESP8266/wiki
+[Blog](http://desire.giesecke.tk/esp8266-google-cloud-messaging-without-external-server/)<br />
+[Wiki](https://github.com/beegee-tokyo/GCM-ESP8266/wiki)<br />
 
 ## Function references
 ###boolean gcmSendMsg()
