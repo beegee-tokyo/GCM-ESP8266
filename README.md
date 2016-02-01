@@ -20,7 +20,8 @@ Install the library as explained in the ArduinoJson Wiki: https://github.com/bbl
 
 ## Detailed description
 **TODO** Add valid link<br />
-http://desire.giesecke.tk/esp8266-using-gcm-without-external-server/<br />
+http://desire.giesecke.tk/esp8266-google-cloud-messaging-without-external-server/<br />
+https://github.com/beegee-tokyo/GCM-ESP8266/wiki
 
 ## Function references
 ###boolean gcmSendMsg()
