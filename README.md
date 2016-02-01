@@ -23,6 +23,30 @@ Install the library as explained in the ArduinoJson Wiki: https://github.com/bbl
 http://desire.giesecke.tk/esp8266-using-gcm-without-external-server/<br />
 
 ## Function references
+###boolean gcmSendMsg()
+#####Description
+sends message to https://android.googleapis.com/gcm/send to	request a push notification to all registered Android devices
+#####Arguments
+_pushMessageIds[]_ Json array with the key(s) for the message(s)<br />
+_pushMessages[]_ Json array with the message(s)
+#####Used global variables
+Global string array *regAndroidIds[]* contains the ids<br />
+Global int *regDevNum* contains number of devices
+#####Return value
+_true_ if the request was successful send to the GCM server<br />
+_false_ if sending the request to the GCM server failed
+#####Example
+		// Create messages & keys as JSON arrays
+		DynamicJsonBuffer jsonBufferKeys;
+		DynamicJsonBuffer jsonBufferMsgs;
+		JsonArray& msgKeysJSON = jsonBufferKeys.createArray();
+		JsonArray& msgsJSON = jsonBufferMsgs.createArray();
+		msgKeysJSON.add("sensortype");
+		msgKeysJSON.add("value");
+		msgsJSON.add("humitity");
+		msgsJSON.add(95);
+		gcmSendMsg(msgKeysJSON, msgsJSON);
+
 ###boolean writeRegIds()
 #####Description
 reads Android registration ids from the array regAndroidIds[] and saves them to the file gcm.txt as JSON object
@@ -80,9 +104,12 @@ _false_ if the registration id was invalid, if the max number of ids was reached
 ###boolean delRegisteredDevice()
 #####Description
 deletes one or all Android registration id(s) from the file gcm.txt
+#####Signatures
+    boolean delRegisterDevice();
+    boolean delRegisterDevice(String delRegId);
+    boolean delRegisterDevice(int delRegIndex);
 #####Arguments
-_delAll_ boolean flag for deleting all registration ids
-_delRegId_ String with the registration id to be deleted
+_delRegId_ String with the registration id to be deleted<br />
 _delRegIndex_ Index of the registration id to be deleted
 #####Used global variables
 Global string array *regAndroidIds[]* contains the ids<br />
@@ -93,7 +120,7 @@ _false_ if the registration id was not found, if the indwx was invalid or if a f
 #####Example
     // Delete registration id by the id itself
     String delID = "XXX91bFZIZMVJPeWjfEfaqMOWctyfAOifSl6Tz52BpCVHIsGmJnq7dr8XIAueSV2SsjkTTW_vlhDGOS8t-uuITk3jAe-d8NnYuuzhGdS3jGiXpgJYFAfz1gqndx_yz0zo3cWcLsJ0Usx";
-    if (!delRegisteredDevice(false, delID, 9999)) {
+    if (!delRegisteredDevice(delID)) {
         Serial.println("Failed to delete ID");
     } else {
         Serial.println("Successful deleted ID");
@@ -101,38 +128,15 @@ _false_ if the registration id was not found, if the indwx was invalid or if a f
 
     // Delete registration id at index
     int delIndex = 1;
-    if (!delRegisteredDevice(false, "", delIndex)) {
+    if (!delRegisteredDevice(delIndex)) {
         Serial.println("Failed to delete ID");
     } else {
         Serial.println("Successful deleted ID");
     }
 
     // Delete all saved registration ids
-    int delIndex = 1;
-    if (!delRegisteredDevice(true, "", 9999)) {
+    if (!delRegisteredDevice()) {
         Serial.println("Failed to delete IDs");
     } else {
         Serial.println("Successful deleted all IDs");
-    }
-
-###boolean gcmSendMsg()
-#####Description
-sends message to https://android.googleapis.com/gcm/send to	request a push notification to all registered Android devices
-#####Arguments
-_numData_ int number of keys and messages to be added to the push notification
-_pushMessageIds[]_ String array with the key(s) for the message(s)
-_pushMessages[]_ String array with the message(s)
-#####Used global variables
-Global string array *regAndroidIds[]* contains the ids<br />
-Global int *regDevNum* contains number of devices
-#####Return value
-_true_ if the request was successful send to the GCM server<br />
-_false_ if sending the request to the GCM server failed
-#####Example
-    String messageIDs[2] = {"sensor","value"};
-    String messageTxts[2] = ("humidity","95%"};
-    if (!gcmSendMsg(2, messageIDs, messageTxts)) {
-        Serial.println("Failed to request push notification");
-    } else {
-        Serial.println("Successful requested push notification");
     }

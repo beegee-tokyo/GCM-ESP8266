@@ -1,7 +1,10 @@
 package tk.giesecke.gcm_esp8266;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	// Registration Id from GCM
 	private static final String PREF_GCM_REG_ID = "PREF_GCM_REG_ID";
 	private SharedPreferences prefs;
+
 	// Your project number and web server url.
 	private static final String GCM_SENDER_ID = "928633261430";
 	private static final String WEB_SERVER_URL = "http://192.168.0.148";
@@ -55,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private static final int MSG_REGISTER_WEB_SERVER_SUCCESS = 103;
 	private static final int MSG_REGISTER_WEB_SERVER_FAILURE = 104;
 	private String gcmRegId;
+
+	private static Handler updateUIHandler;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		gcmRegId = getSharedPreferences().getString(PREF_GCM_REG_ID, "");
 
 		if (TextUtils.isEmpty(gcmRegId)) {
-//			handler.sendEmptyMessage(MSG_REGISTER_WITH_GCM);
 			showHideButtons(false);
 		}else{
 			showHideButtons(true);
@@ -91,6 +97,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			if (BuildConfig.DEBUG)
 				Log.d(DEBUG_LOG_TAG, "Already registered with GCM: " + gcmRegId);
 		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// Register handler for UI update
+		updateUIHandler = new Handler();
+
+		// Register the receiver for messages from GCM listener
+		if (activityReceiver != null) {
+			//Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
+			IntentFilter intentFilter = new IntentFilter(GCMIntentService.BROADCAST_RECEIVED);
+			//Map the intent filter to the receiver
+			registerReceiver(activityReceiver, intentFilter);
+		}
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		// Unregister the receiver for messages from GCM listener
+		unregisterReceiver(activityReceiver);
 	}
 
 	/**
@@ -387,4 +415,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			listBtn.setVisibility(View.GONE);
 		}
 	}
+
+	class updateUI implements Runnable {
+		private final String msg;
+
+		public updateUI(String str) {
+			this.msg = str;
+		}
+
+		@Override
+		public void run() {
+			regIdView.setText(msg);
+		}
+	}
+
+	private final BroadcastReceiver activityReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String message = "Received from " +
+					intent.getStringExtra("sender") +
+					" the message\n" +
+					intent.getStringExtra("message");
+
+			updateUIHandler.post(new updateUI(message));
+		}
+	};
 }

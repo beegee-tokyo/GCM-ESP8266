@@ -18,6 +18,7 @@ import android.support.v4.app.NotificationCompat;
 public class GCMIntentService extends IntentService {
 
 	private static final int NOTIFICATION_ID = 1000;
+	public static final String BROADCAST_RECEIVED = "BC_RECEIVED";
 
 	public GCMIntentService() {
 		super(GCMIntentService.class.getName());
@@ -32,8 +33,9 @@ public class GCMIntentService extends IntentService {
 			// read extras as sent from server
 			String message = extras.getString("message");
 			String serverTime = extras.getString("timestamp");
-			sendNotification("Message: " + message + "\n" + "Server Time: "
-					+ serverTime);
+			String displayTxt = "Message: " + message + "\n" + "Server Time: " + serverTime;
+			sendNotification(displayTxt);
+			sendGCMBroadcast(displayTxt);
 		}
 		// Release the wake lock provided by the WakefulBroadcastReceiver.
 		GCMBroadcastReceiver.completeWakefulIntent(intent);
@@ -45,13 +47,22 @@ public class GCMIntentService extends IntentService {
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				new Intent(this, MainActivity.class), 0);
 
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-				this).setSmallIcon(R.mipmap.ic_launcher)
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+				.setSmallIcon(R.mipmap.ic_launcher)
 				.setContentTitle("Notification from GCM")
 				.setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
 				.setContentText(msg);
 
 		mBuilder.setContentIntent(contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+	}
+
+	//send broadcast from activity to all receivers listening to the action "ACTION_STRING_ACTIVITY"
+	private void sendGCMBroadcast(String msgReceived) {
+		Intent broadCastIntent = new Intent();
+		broadCastIntent.setAction(BROADCAST_RECEIVED);
+		broadCastIntent.putExtra("sender", "GCM");
+		broadCastIntent.putExtra("message", msgReceived);
+		sendBroadcast(broadCastIntent);
 	}
 }
