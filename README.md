@@ -16,8 +16,7 @@ To send requests to the GCM servers JSON objects are used. The easiest way to im
 All credits for the ArduinoJson library go to Benoit Blanchon. You can get it from:<br />
 [Blog on Good Code Smell](http://blog.benoitblanchon.fr/arduino-json-v5-0/)<br />
 [Github sources](https://github.com/bblanchon/ArduinoJson)<br />
-Install the library as explained in the ArduinoJson Wiki: https://github.com/bblanchon/ArduinoJson/wiki/Using%20the%20library%20with%20Arduino<br />
-
+Install the library as explained in the ArduinoJson Wiki: [Using the library with Arduino](https://github.com/bblanchon/ArduinoJson/wiki/Using%20the%20library%20with%20Arduino)<br />
 ## Detailed description
 [Blog](http://desire.giesecke.tk/esp8266-google-cloud-messaging-without-external-server/)<br />
 [Wiki](https://github.com/beegee-tokyo/GCM-ESP8266/wiki)<br />
