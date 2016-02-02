@@ -398,73 +398,13 @@ boolean delRegisteredDevice(int delRegIndex) {
 }
 
 /**
-	gcmSendMsg
+	gcmSendOut
 	sends message to https://android.googleapis.com/gcm/send to
 		request a push notification to registered Android devices
-	pushMessageIds - Json array with the keys (aka names) of the messages
-	pushMessages - Json array with the messages
-		a message can be any type of variable: 
-		boolean, char, integer, long, float, string, ...
+	data - String with the Json object containing the reg IDs and data
 	returns true if successful, false if an error occured
 */
-boolean gcmSendMsg(JsonArray& pushMessageIds, JsonArray& pushMessages) {
-	#ifdef DEBUG_OUT 
-	Serial.println("===========================================");
-	Serial.println("gcmSendMsg");
-	Serial.println("===========================================");
-	#endif
-	
-	// Update list of registered devices
-	getRegisteredDevices();
-
-	if (regDevNum == 0) { // Any devices already registered?
-		#ifdef DEBUG_OUT 
-		Serial.println("No registered devices");
-		#endif
-		failReason = "No registered devices";
-		return false;
-	}
-	
-	if (pushMessageIds.size() != pushMessages.size()) {
-		#ifdef DEBUG_OUT 
-		Serial.println("Different number of keys and messages");
-		#endif
-		failReason = "Different number of keys and messages";
-		return false;
-	}
-	
-	int numData = pushMessageIds.size();
-
-	String data;
-	// Create JSON object with registration_ids and data
-	if (numData != 0) {
-		DynamicJsonBuffer jsonBuffer;
-		DynamicJsonBuffer jsonDataBuffer;
-
-		// Prepare JSON object
-		JsonObject& msgJSON = jsonBuffer.createObject();
-		// Add registration ids to JsonArray regIdArray in the JsonObject msgJSON
-		JsonArray& regIdArray = msgJSON.createNestedArray("registration_ids");
-		for (int i=0; i<regDevNum; i++) {
-			regIdArray.add(regAndroidIds[i]);
-		}
-		// Add message keys and messages to JsonObject dataArray
-		JsonObject& dataArray = jsonDataBuffer.createObject();
-		for (int i=0; i<numData; i++) {
-			String keyStr = pushMessageIds.get(i);
-			dataArray[keyStr] = pushMessages.get(i);
-		}
-		// Add JsonObject dataArray to JsonObject msgJSON
-		msgJSON["data"] = dataArray;
-		msgJSON.printTo(data);
-	} else { // No data to send
-		#ifdef DEBUG_OUT 
-		Serial.println("No data to send");
-		#endif
-		failReason = "No data to send";
-		return false;
-	}
-
+boolean gcmSendOut(String data) {
 	gcmClient.stop(); // Just to be sure
 	#ifdef DEBUG_OUT 
 	Serial.print("Connecting to ");
@@ -476,7 +416,6 @@ boolean gcmSendMsg(JsonArray& pushMessageIds, JsonArray& pushMessages) {
 		Serial.println("Connected to GCM server");
 		#endif
 		
-		// String postStr = "POST /gcm/send HTTP/1.1\r\n";
 		String postStr = "POST /gcm/send HTTP/1.1\r\n";
 		postStr += "Host: " + hostName + "\r\n";
 		postStr += "Accept: */";
@@ -536,4 +475,119 @@ boolean gcmSendMsg(JsonArray& pushMessageIds, JsonArray& pushMessages) {
 		failReason = resultJSON;
 		return true;
 	}
+}
+
+/**
+	gcmSendMsg
+	prepares the JSON object holding the registration IDs and data
+	calls gcmSendOut to forward the request to the GCM server
+	pushMessageIds - Json array with the keys (aka names) of the messages
+	pushMessages - Json array with the messages
+		a message can be any type of variable: 
+		boolean, char, integer, long, float, string, ...
+	returns true if successful, false if an error occured
+*/
+boolean gcmSendMsg(JsonArray& pushMessageIds, JsonArray& pushMessages) {
+	#ifdef DEBUG_OUT 
+	Serial.println("===========================================");
+	Serial.println("gcmSendMsg - JsonArrays");
+	Serial.println("===========================================");
+	#endif
+	
+	// Update list of registered devices
+	getRegisteredDevices();
+
+	if (regDevNum == 0) { // Any devices already registered?
+		#ifdef DEBUG_OUT 
+		Serial.println("No registered devices");
+		#endif
+		failReason = "No registered devices";
+		return false;
+	}
+	
+	if (pushMessageIds.size() != pushMessages.size()) {
+		#ifdef DEBUG_OUT 
+		Serial.println("Different number of keys and messages");
+		#endif
+		failReason = "Different number of keys and messages";
+		return false;
+	}
+	
+	int numData = pushMessageIds.size();
+
+	String data;
+	// Create JSON object with registration_ids and data
+	if (numData != 0) {
+		DynamicJsonBuffer jsonBuffer;
+		DynamicJsonBuffer jsonDataBuffer;
+
+		// Prepare JSON object
+		JsonObject& msgJSON = jsonBuffer.createObject();
+		// Add registration ids to JsonArray regIdArray in the JsonObject msgJSON
+		JsonArray& regIdArray = msgJSON.createNestedArray("registration_ids");
+		for (int i=0; i<regDevNum; i++) {
+			regIdArray.add(regAndroidIds[i]);
+		}
+		// Add message keys and messages to JsonObject dataArray
+		JsonObject& dataArray = jsonDataBuffer.createObject();
+		for (int i=0; i<numData; i++) {
+			String keyStr = pushMessageIds.get(i);
+			dataArray[keyStr] = pushMessages.get(i);
+		}
+		// Add JsonObject dataArray to JsonObject msgJSON
+		msgJSON["data"] = dataArray;
+		msgJSON.printTo(data);
+	} else { // No data to send
+		#ifdef DEBUG_OUT 
+		Serial.println("No data to send");
+		#endif
+		failReason = "No data to send";
+		return false;
+	}
+	
+	return gcmSendOut(data);
+}
+
+/**
+	gcmSendMsg
+	prepares the JSON object holding the registration IDs and data
+	calls gcmSendOut to forward the request to the GCM server
+	pushMessages - Json object with the data for the push notification
+	returns true if successful, false if an error occured
+*/
+boolean gcmSendMsg(JsonObject& pushMessages) {
+	#ifdef DEBUG_OUT 
+	Serial.println("===========================================");
+	Serial.println("gcmSendMsg - JsonObject");
+	Serial.println("===========================================");
+	#endif
+	
+	// Update list of registered devices
+	getRegisteredDevices();
+
+	if (regDevNum == 0) { // Any devices already registered?
+		#ifdef DEBUG_OUT 
+		Serial.println("No registered devices");
+		#endif
+		failReason = "No registered devices";
+		return false;
+	}
+	
+	String data;
+	// Create JSON object with registration_ids and data
+	DynamicJsonBuffer jsonBuffer;
+	DynamicJsonBuffer jsonDataBuffer;
+
+	// Prepare JSON object
+	JsonObject& msgJSON = jsonBuffer.createObject();
+	// Add registration ids to JsonArray regIdArray in the JsonObject msgJSON
+	JsonArray& regIdArray = msgJSON.createNestedArray("registration_ids");
+	for (int i=0; i<regDevNum; i++) {
+		regIdArray.add(regAndroidIds[i]);
+	}
+	// Add JsonObject pushMessages to JsonObject msgJSON
+	msgJSON["data"] = pushMessages;
+	msgJSON.printTo(data);
+	
+	return gcmSendOut(data);
 }

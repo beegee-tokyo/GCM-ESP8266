@@ -24,10 +24,13 @@ Install the library as explained in the ArduinoJson Wiki: [Using the library wit
 ## Function references
 ###boolean gcmSendMsg()
 #####Description
-sends message to https://android.googleapis.com/gcm/send to	request a push notification to all registered Android devices
+prepares the JSON object holding the registration IDs and data and calls gcmSendOut to forward the request to the GCM server
+#####Signatures
+    boolean gcmSendMsg(JsonArray& pushMessageIds, JsonArray& pushMessages);
+    boolean gcmSendMsg(JsonObject& pushMessages);
 #####Arguments
-_pushMessageIds[]_ Json array with the key(s) for the message(s)<br />
-_pushMessages[]_ Json array with the message(s)
+_pushMessageIds_ Json array with the key(s) for the message(s)<br />
+_pushMessages_ Json array with the message(s) or Json object with key:message fields
 #####Used global variables
 Global string array *regAndroidIds[]* contains the ids<br />
 Global int *regDevNum* contains number of devices
@@ -139,3 +142,18 @@ _false_ if the registration id was not found, if the indwx was invalid or if a f
     } else {
         Serial.println("Successful deleted all IDs");
     }
+
+###boolean gcmSendOut()
+#####Description
+sends message to https://android.googleapis.com/gcm/send to	request a push notification to all registered Android devices
+used internal only
+#####Arguments
+_data_ String with the Json object containing the reg IDs and data
+#####Used global variables
+_none_
+#####Return value
+_true_ if the request was successful send to the GCM server<br />
+_false_ if sending the request to the GCM server failed
+#####Example
+		used internal only
+
